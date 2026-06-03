@@ -76,8 +76,8 @@ export default function App() {
               {...item}
               expanded={expandedSubscriptionId === item.id}
               onPress={() =>
-                setExpandedSubscriptionId(
-                  expandedSubscriptionId === item.id ? null : item.id,
+                setExpandedSubscriptionId((prev) =>
+                  prev === item.id ? null : item.id,
                 )
               }
             />
