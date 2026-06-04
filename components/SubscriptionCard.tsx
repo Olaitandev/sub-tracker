@@ -22,6 +22,8 @@ const SubscriptionCard = ({
   startDate,
   status,
 }: SubscriptionCardProps) => {
+  const fallback = "Not provided";
+
   return (
     <Pressable
       className={clsx("sub-card", expanded ? "sub-card-expanded" : "bg-card")}
@@ -38,7 +40,8 @@ const SubscriptionCard = ({
             <Text numberOfLines={1} ellipsizeMode="tail" className="sub-meta">
               {category?.trim() ||
                 plan?.trim() ||
-                (renewalDate ? formatSubscriptionDateTime(renewalDate) : "")}
+                (renewalDate ? formatSubscriptionDateTime(renewalDate) : "") ||
+                fallback}
             </Text>
           </View>
         </View>
@@ -63,7 +66,7 @@ const SubscriptionCard = ({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {paymentMethod?.trim()}
+                  {paymentMethod?.trim() || fallback}
                 </Text>
               </View>
             </View>
@@ -75,7 +78,7 @@ const SubscriptionCard = ({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {category?.trim() || plan?.trim()}
+                  {category?.trim() || plan?.trim() || fallback}
                 </Text>
               </View>
             </View>
