@@ -32,6 +32,12 @@ export default function RootLayout() {
     return null;
   }
 
+  if (!publishableKey) {
+    throw new Error(
+      "Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in environment variables",
+    );
+  }
+
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <Stack screenOptions={{ headerShown: false }} />
