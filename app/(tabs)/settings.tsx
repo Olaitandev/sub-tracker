@@ -1,6 +1,7 @@
 import { useAuth } from "@clerk/expo";
 import { useRouter, type Href } from "expo-router";
 import { styled } from "nativewind";
+import { usePostHog } from "posthog-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
@@ -9,8 +10,11 @@ const SafeAreaView = styled(RNSafeAreaView);
 const Settings = () => {
   const { signOut } = useAuth();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const handleLogout = async () => {
+    posthog.capture("user_signed_out");
+    posthog.reset();
     await signOut();
     router.replace("/(auth)/sign-in" as Href);
   };
