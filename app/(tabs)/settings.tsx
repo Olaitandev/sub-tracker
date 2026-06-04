@@ -6,7 +6,7 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
-const settings = () => {
+const Settings = () => {
   const { signOut } = useAuth();
   const router = useRouter();
 
@@ -31,6 +31,6 @@ const settings = () => {
   );
 };
 
-export default settings;
+export default Settings;
 
 const styles = StyleSheet.create({});
