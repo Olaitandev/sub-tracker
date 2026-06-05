@@ -1,6 +1,11 @@
 import "@/global.css";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack, usePathname, useGlobalSearchParams } from "expo-router";
+import {
+    SplashScreen,
+    Stack,
+    useGlobalSearchParams,
+    usePathname,
+} from "expo-router";
 import { useEffect, useRef } from "react";
 
 import { ClerkProvider } from "@clerk/expo";
@@ -45,7 +50,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().catch(() => {
+        // silently ignore — splash already hidden or never registered
+      });
 
       return;
     }
