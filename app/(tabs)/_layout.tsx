@@ -31,14 +31,18 @@ const TabLayout = () => {
     return null;
   }
 
+  // if (!isSignedIn) {
+  //   return <Redirect href="/(auth)/sign-in" />;
+  // }
   if (!isSignedIn) {
+    console.log("not signerd in redirecting");
     return <Redirect href="/(auth)/sign-in" />;
   }
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
