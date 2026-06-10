@@ -1,10 +1,11 @@
 import "@/global.css";
 import { useFonts } from "expo-font";
 import {
-    SplashScreen,
-    Stack,
-    useGlobalSearchParams,
-    usePathname,
+  SplashScreen,
+  Stack,
+  useGlobalSearchParams,
+  usePathname,
+  useRouter,
 } from "expo-router";
 import { useEffect, useRef } from "react";
 
@@ -36,6 +37,8 @@ if (!publishableKey) {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const router = useRouter();
+
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
     "sans-bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
@@ -64,7 +67,7 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => {
         // silently ignore — splash already hidden or never registered
       });
-
+      // router.replace("/(onboarding)");
       return;
     }
   }, [fontsLoaded]);
@@ -83,7 +86,16 @@ export default function RootLayout() {
           propsToCapture: ["testID"],
         }}
       >
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: "fade_from_bottom",
+            animationDuration: 200,
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+          <Stack.Screen name="(onboarding)" options={{ animation: "fade" }} />
+        </Stack>
       </PostHogProvider>
     </ClerkProvider>
   );

@@ -1,5 +1,6 @@
 import { useSignIn } from "@clerk/expo";
 import { Link, useRouter, type Href } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
 import { useState } from "react";
@@ -13,12 +14,15 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { s, vs } from "react-native-size-matters";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const SignIn = () => {
   const { signIn, errors, fetchStatus } = useSignIn();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+
   const posthog = usePostHog();
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -137,10 +141,10 @@ const SignIn = () => {
   // Show verification screen if client trust is needed
   if (signIn.status === "needs_client_trust") {
     return (
-      <SafeAreaView className="auth-safe-area">
+      <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="auth-screen"
+          className="flex-1"
         >
           <ScrollView
             className="auth-scroll"
@@ -152,11 +156,7 @@ const SignIn = () => {
               <View className="auth-brand-block">
                 <View className="auth-logo-wrap">
                   <View className="auth-logo-mark">
-                    <Text className="auth-logo-mark-text">R</Text>
-                  </View>
-                  <View>
-                    <Text className="auth-wordmark">Recurrly</Text>
-                    <Text className="auth-wordmark-sub">SUBSCRIPTIONS</Text>
+                    <Text className="auth-logo-mark-text">S</Text>
                   </View>
                 </View>
                 <Text className="auth-title">Verify your identity</Text>
@@ -166,7 +166,7 @@ const SignIn = () => {
               </View>
 
               {/* Verification Form */}
-              <View className="auth-card">
+              <View className="p-5 mt-16 border rounded-3xl border-border">
                 <View className="auth-form">
                   <View className="auth-field">
                     <Text className="auth-label">Verification Code</Text>
@@ -227,10 +227,10 @@ const SignIn = () => {
 
   // Main sign-in form
   return (
-    <SafeAreaView className="auth-safe-area">
+    <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="auth-screen"
+        className="flex-1"
       >
         <ScrollView
           className="auth-scroll"
@@ -242,11 +242,7 @@ const SignIn = () => {
             <View className="auth-brand-block">
               <View className="auth-logo-wrap">
                 <View className="auth-logo-mark">
-                  <Text className="auth-logo-mark-text">R</Text>
-                </View>
-                <View>
-                  <Text className="auth-wordmark">Recurrly</Text>
-                  <Text className="auth-wordmark-sub">SUBSCRIPTIONS</Text>
+                  <Text className="auth-logo-mark-text">S</Text>
                 </View>
               </View>
               <Text className="auth-title">Welcome back</Text>
@@ -256,7 +252,7 @@ const SignIn = () => {
             </View>
 
             {/* Sign-In Form */}
-            <View className="auth-card">
+            <View className="p-5 mt-16 border rounded-3xl border-border">
               <View className="auth-form">
                 <View className="auth-field">
                   <Text className="auth-label">Email Address</Text>
@@ -270,6 +266,10 @@ const SignIn = () => {
                     onBlur={() => setEmailTouched(true)}
                     keyboardType="email-address"
                     autoComplete="email"
+                    style={{
+                      paddingHorizontal: s(10),
+                      paddingVertical: vs(10),
+                    }}
                   />
                   {emailTouched && !emailValid && (
                     <Text className="auth-error">
@@ -285,6 +285,51 @@ const SignIn = () => {
 
                 <View className="auth-field">
                   <Text className="auth-label">Password</Text>
+
+                  <View
+                    className={`flex-row items-center border rounded-xl border-border ${
+                      passwordTouched && !passwordValid
+                        ? "border-red-500"
+                        : "border-border"
+                    }`}
+                  >
+                    <TextInput
+                      className="flex-1"
+                      value={password}
+                      placeholder="Enter your password"
+                      placeholderTextColor="rgba(0,0,0,0.4)"
+                      secureTextEntry={!showPassword}
+                      onChangeText={setPassword}
+                      onBlur={() => setPasswordTouched(true)}
+                      autoComplete="password"
+                      onSubmitEditing={handleSubmit}
+                      style={{
+                        paddingHorizontal: s(10),
+                        paddingVertical: vs(10),
+                      }}
+                    />
+
+                    <Pressable
+                      onPress={() => setShowPassword((prev) => !prev)}
+                      className="px-3"
+                      hitSlop={10}
+                    >
+                      {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </Pressable>
+                  </View>
+
+                  {passwordTouched && !passwordValid && (
+                    <Text className="auth-error">Password is required</Text>
+                  )}
+
+                  {errors.fields.password && (
+                    <Text className="auth-error">
+                      {errors.fields.password.message}
+                    </Text>
+                  )}
+                </View>
+                {/* <View className="auth-field">
+                  <Text className="auth-label">Password</Text>
                   <TextInput
                     className={`auth-input ${passwordTouched && !passwordValid && "auth-input-error"}`}
                     value={password}
@@ -294,6 +339,11 @@ const SignIn = () => {
                     onChangeText={setPassword}
                     onBlur={() => setPasswordTouched(true)}
                     autoComplete="password"
+                    onSubmitEditing={handleSubmit}
+                    style={{
+                      paddingHorizontal: s(10),
+                      paddingVertical: vs(10),
+                    }}
                   />
                   {passwordTouched && !passwordValid && (
                     <Text className="auth-error">Password is required</Text>
@@ -303,8 +353,7 @@ const SignIn = () => {
                       {errors.fields.password.message}
                     </Text>
                   )}
-                </View>
-
+                </View> */}
                 <Pressable
                   className={`auth-button ${(!formValid || fetchStatus === "fetching") && "auth-button-disabled"}`}
                   onPress={handleSubmit}

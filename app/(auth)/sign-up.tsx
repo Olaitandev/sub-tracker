@@ -1,19 +1,21 @@
 import { useAuth, useSignUp } from "@clerk/expo";
-import { Link, useRouter, type Href } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { s, vs } from "react-native-size-matters";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -26,6 +28,7 @@ const SignUp = () => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [navigating, setNavigating] = useState(false);
 
   // Validation states
   const [emailTouched, setEmailTouched] = useState(false);
@@ -61,40 +64,65 @@ const SignUp = () => {
     }
   };
 
+  // const handleVerify = async () => {
+  //   await signUp.verifications.verifyEmailCode({
+  //     code,
+  //   });
+
+  //   if (signUp.status === "complete") {
+  //     await signUp.finalize({
+  //       navigate: ({ session, decorateUrl }) => {
+  //         if (session?.currentTask) {
+  //           console.log(session?.currentTask);
+  //           return;
+  //         }
+
+  //         posthog.identify(emailAddress, {
+  //           $set: { email: emailAddress },
+  //           $set_once: { sign_up_date: new Date().toISOString() },
+  //         });
+  //         posthog.capture("user_signed_up", { email: emailAddress });
+
+  //         const url = decorateUrl("/(auth)/user-info");
+  //         if (url.startsWith("http")) {
+  //           // Only use window.location on web platform
+  //           if (typeof window !== "undefined" && window.location) {
+  //             window.location.href = url;
+  //           } else {
+  //             // On native, just use router navigation
+  //             router.replace("/(auth)/user-info");
+  //           }
+  //         } else {
+  //           router.replace(url as Href);
+  //         }
+  //       },
+  //     });
+  //   } else {
+  //     console.error("Sign-up attempt not complete:", signUp);
+  //   }
+  // };
+
   const handleVerify = async () => {
     await signUp.verifications.verifyEmailCode({
       code,
     });
-
     if (signUp.status === "complete") {
+      setNavigating(true);
       await signUp.finalize({
-        navigate: ({ session, decorateUrl }) => {
+        // Redirect the user to the home page after signing up
+        navigate: ({ session }) => {
+          // Handle session tasks
+          // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
           if (session?.currentTask) {
             console.log(session?.currentTask);
             return;
           }
 
-          posthog.identify(emailAddress, {
-            $set: { email: emailAddress },
-            $set_once: { sign_up_date: new Date().toISOString() },
-          });
-          posthog.capture("user_signed_up", { email: emailAddress });
-
-          const url = decorateUrl("/(tabs)");
-          if (url.startsWith("http")) {
-            // Only use window.location on web platform
-            if (typeof window !== "undefined" && window.location) {
-              window.location.href = url;
-            } else {
-              // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
-            }
-          } else {
-            router.replace(url as Href);
-          }
+          router.push("/(auth)/user-info");
         },
       });
     } else {
+      // Check why the sign-up is not complete
       console.error("Sign-up attempt not complete:", signUp);
     }
   };
@@ -111,10 +139,10 @@ const SignUp = () => {
     signUp.missingFields.length === 0
   ) {
     return (
-      <SafeAreaView className="auth-safe-area">
+      <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="auth-screen"
+          className="flex-1 "
         >
           <ScrollView
             className="auth-scroll"
@@ -126,10 +154,10 @@ const SignUp = () => {
               <View className="auth-brand-block">
                 <View className="auth-logo-wrap">
                   <View className="auth-logo-mark">
-                    <Text className="auth-logo-mark-text">R</Text>
+                    <Text className="auth-logo-mark-text">S</Text>
                   </View>
                   <View>
-                    <Text className="auth-wordmark">Recurrly</Text>
+                    <Text className="auth-wordmark">SubTrack</Text>
                     <Text className="auth-wordmark-sub">SUBSCRIPTIONS</Text>
                   </View>
                 </View>
@@ -192,16 +220,42 @@ const SignUp = () => {
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
+        {navigating && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "#fff",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 999,
+            }}
+          >
+            <ActivityIndicator size="large" color="#10b981" />
+            <Text
+              style={{
+                marginTop: 12,
+                color: "#6b7280",
+                fontFamily: "your-font",
+              }}
+            >
+              Setting up your account...
+            </Text>
+          </View>
+        )}
       </SafeAreaView>
     );
   }
 
   // Main sign-up form
   return (
-    <SafeAreaView className="auth-safe-area">
+    <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="auth-screen"
+        className="flex-1"
       >
         <ScrollView
           className="auth-scroll"
@@ -213,21 +267,21 @@ const SignUp = () => {
             <View className="auth-brand-block">
               <View className="auth-logo-wrap">
                 <View className="auth-logo-mark">
-                  <Text className="auth-logo-mark-text">R</Text>
+                  <Text className="auth-logo-mark-text">S</Text>
                 </View>
-                <View>
-                  <Text className="auth-wordmark">Recurrly</Text>
+                {/* <View>
+                  <Text className="auth-wordmark">SubTrack</Text>
                   <Text className="auth-wordmark-sub">SUBSCRIPTIONS</Text>
-                </View>
+                </View> */}
               </View>
-              <Text className="auth-title">Create your account</Text>
+              <Text className="auth-title">Create Account</Text>
               <Text className="auth-subtitle">
-                Start tracking your subscriptions and never miss a payment
+                Save your subscriptions and sync across every device, securely
               </Text>
             </View>
 
             {/* Sign-Up Form */}
-            <View className="auth-card">
+            <View className="p-5 mt-16 border rounded-3xl border-border">
               <View className="auth-form">
                 <View className="auth-field">
                   <Text className="auth-label">Email Address</Text>
@@ -241,6 +295,10 @@ const SignUp = () => {
                     onBlur={() => setEmailTouched(true)}
                     keyboardType="email-address"
                     autoComplete="email"
+                    style={{
+                      paddingHorizontal: s(10),
+                      paddingVertical: vs(10),
+                    }}
                   />
                   {emailTouched && !emailValid && (
                     <Text className="auth-error">
@@ -265,6 +323,11 @@ const SignUp = () => {
                     onChangeText={setPassword}
                     onBlur={() => setPasswordTouched(true)}
                     autoComplete="password-new"
+                    onSubmitEditing={handleSubmit}
+                    style={{
+                      paddingHorizontal: s(10),
+                      paddingVertical: vs(10),
+                    }}
                   />
                   {passwordTouched && !passwordValid && (
                     <Text className="auth-error">
@@ -303,6 +366,16 @@ const SignUp = () => {
               <Link href="/(auth)/sign-in" asChild>
                 <Pressable>
                   <Text className="auth-link">Sign In</Text>
+                </Pressable>
+              </Link>
+            </View>
+
+            {/* test */}
+            <View className="auth-link-row">
+              <Text className="auth-link-copy">Go to get to know you?</Text>
+              <Link href="/(auth)/user-info" asChild>
+                <Pressable>
+                  <Text className="auth-link">Get to know you</Text>
                 </Pressable>
               </Link>
             </View>

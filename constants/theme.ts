@@ -1,3 +1,6 @@
+import { StyleSheet } from "react-native";
+import { ms, s, vs } from "react-native-size-matters";
+
 export const colors = {
   background: "#fff9e3",
   foreground: "#081126",
@@ -44,8 +47,99 @@ export const components = {
   },
 } as const;
 
+export const globalStyles = StyleSheet.create({
+  // for Buttons
+
+  primaryButton: {
+    backgroundColor: colors.accent,
+    paddingVertical: vs(12),
+    borderRadius: ms(10),
+    alignItems: "center",
+    justifyContent: "center",
+    // marginTop: hp(2.5),
+  },
+
+  secondaryButton: {
+    backgroundColor: colors.background,
+    paddingVertical: vs(12),
+    borderRadius: ms(10),
+    alignItems: "center",
+    justifyContent: "center",
+    // marginTop: hp(2.5),
+  },
+
+  buttonText: {
+    fontSize: ms(13),
+    fontWeight: "500",
+    color: "#ffffff",
+    // fontFamily: FONTS.medium,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+
+  // end of button
+
+  modal: {
+    justifyContent: "flex-end",
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: vs(25),
+    gap: 10,
+  },
+  modalHeader: {
+    paddingBottom: s(10),
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    marginBottom: vs(1),
+  },
+  modalTitle: {
+    fontSize: ms(13),
+    fontWeight: "600",
+    color: "#000",
+    textAlign: "center",
+    borderColor: colors.accent,
+    fontFamily: "sans-semibold",
+  },
+  modalButton: {
+    paddingVertical: vs(10),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  modalButtonText: {
+    fontSize: ms(13),
+    fontWeight: "500",
+    fontFamily: "sans-medium",
+  },
+  selectedCurrencyText: {
+    fontWeight: "600",
+    color: colors.accent,
+  },
+  checkmark: {
+    width: s(15),
+    height: vs(14),
+    borderRadius: ms(999),
+    backgroundColor: colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkmarkText: {
+    color: "#fff",
+    fontSize: ms(10),
+    fontWeight: "bold",
+    // fontFamily: FONTS.regular,
+  },
+});
+
 export const theme = {
   colors,
   spacing,
   components,
+  globalStyles,
 } as const;

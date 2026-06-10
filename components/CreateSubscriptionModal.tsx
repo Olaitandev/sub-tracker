@@ -1,6 +1,8 @@
 import { icons } from "@/constants/icons";
+import { posthog } from "@/src/config/posthog";
 import { clsx } from "clsx";
 import dayjs from "dayjs";
+import * as SplashScreen from "expo-splash-screen";
 
 import { useState } from "react";
 import {
@@ -43,6 +45,8 @@ interface CreateSubscriptionModalProps {
   onClose: () => void;
   onSubmit: (subscription: Subscription) => void;
 }
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const CreateSubscriptionModal = ({
   visible,
@@ -96,6 +100,12 @@ const CreateSubscriptionModal = ({
     };
 
     onSubmit(newSubscription);
+    posthog.capture("subscription_created", {
+      subscription_id: newSubscription.id,
+      subscription_name: newSubscription.name,
+      subscription_category: category,
+      billing_cycle: newSubscription.billing,
+    });
     resetForm();
     onClose();
   };
