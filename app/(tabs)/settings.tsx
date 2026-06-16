@@ -16,19 +16,20 @@ const Settings = () => {
     posthog.capture("user_signed_out");
     posthog.reset();
     await signOut();
-    router.replace("/(auth)/sign-in" as Href);
+    // router.replace("/(auth)/sign-in" as Href);
+    router.replace("/" as Href);
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background p-5">
+    <SafeAreaView className="flex-1 p-5 bg-background" edges={["top"]}>
       <View className="flex-1">
-        <Text className="text-xl font-bold mb-6">Settings</Text>
+        <Text className="mb-6 text-xl font-bold">Settings</Text>
 
         <Pressable
-          className="bg-red-500 rounded-lg p-4 items-center"
+          className="items-center p-4 rounded-lg bg-destructive"
           onPress={handleLogout}
         >
-          <Text className="text-white font-semibold text-base">Logout</Text>
+          <Text className="text-base font-semibold text-white">Logout</Text>
         </Pressable>
       </View>
     </SafeAreaView>

@@ -1,20 +1,22 @@
 import { useSignIn } from "@clerk/expo";
 import { Link, useRouter, type Href } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { Eye, EyeOff } from "lucide-react-native";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { s, vs } from "react-native-size-matters";
+import CustomButton from "../../components/ui/CustomButton";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -22,6 +24,7 @@ const SignIn = () => {
   const { signIn, errors, fetchStatus } = useSignIn();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const posthog = usePostHog();
 
@@ -43,7 +46,7 @@ const SignIn = () => {
 
   const handleSubmit = async () => {
     if (!formValid) return;
-
+    setLoading(true);
     const { error } = await signIn.password({
       emailAddress,
       password,
@@ -51,6 +54,7 @@ const SignIn = () => {
 
     if (error) {
       console.error(JSON.stringify(error, null, 2));
+      setLoading(false);
       posthog.capture("user_sign_in_failed", {
         error_message: error.message,
       });
@@ -228,6 +232,7 @@ const SignIn = () => {
   // Main sign-in form
   return (
     <SafeAreaView className="flex-1">
+      <StatusBar translucent />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -289,7 +294,7 @@ const SignIn = () => {
                   <View
                     className={`flex-row items-center border rounded-xl border-border ${
                       passwordTouched && !passwordValid
-                        ? "border-red-500"
+                        ? "border-destructive"
                         : "border-border"
                     }`}
                   >
@@ -314,7 +319,11 @@ const SignIn = () => {
                       className="px-3"
                       hitSlop={10}
                     >
-                      {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                      {showPassword ? (
+                        <EyeOff size={20} color="gray" />
+                      ) : (
+                        <Eye size={20} color="gray" />
+                      )}
                     </Pressable>
                   </View>
 
@@ -328,41 +337,13 @@ const SignIn = () => {
                     </Text>
                   )}
                 </View>
-                {/* <View className="auth-field">
-                  <Text className="auth-label">Password</Text>
-                  <TextInput
-                    className={`auth-input ${passwordTouched && !passwordValid && "auth-input-error"}`}
-                    value={password}
-                    placeholder="Enter your password"
-                    placeholderTextColor="rgba(0, 0, 0, 0.4)"
-                    secureTextEntry
-                    onChangeText={setPassword}
-                    onBlur={() => setPasswordTouched(true)}
-                    autoComplete="password"
-                    onSubmitEditing={handleSubmit}
-                    style={{
-                      paddingHorizontal: s(10),
-                      paddingVertical: vs(10),
-                    }}
-                  />
-                  {passwordTouched && !passwordValid && (
-                    <Text className="auth-error">Password is required</Text>
-                  )}
-                  {errors.fields.password && (
-                    <Text className="auth-error">
-                      {errors.fields.password.message}
-                    </Text>
-                  )}
-                </View> */}
-                <Pressable
-                  className={`auth-button ${(!formValid || fetchStatus === "fetching") && "auth-button-disabled"}`}
+
+                <CustomButton
+                  text="Sign In"
                   onPress={handleSubmit}
+                  loading={loading}
                   disabled={!formValid || fetchStatus === "fetching"}
-                >
-                  <Text className="auth-button-text">
-                    {fetchStatus === "fetching" ? "Signing In..." : "Sign In"}
-                  </Text>
-                </Pressable>
+                />
               </View>
             </View>
 

@@ -3,20 +3,25 @@ import { posthog } from "@/src/config/posthog";
 import { clsx } from "clsx";
 import dayjs from "dayjs";
 import * as SplashScreen from "expo-splash-screen";
+import CustomModal from "./ui/CustomModal";
 
+import { colors, globalStyles } from "@/constants/theme";
+import { X } from "lucide-react-native";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableWithoutFeedback,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
+import { ms } from "react-native-size-matters";
+import CustomButton from "./ui/CustomButton";
 
 const CATEGORIES = [
   "Entertainment",
@@ -126,13 +131,8 @@ const CreateSubscriptionModal = ({
   const isSubmitDisabled = !name.trim() || !price.trim();
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={handleClose}
-    >
-      <View className="flex-1">
+    <CustomModal visible={visible} onClose={handleClose}>
+      <ScrollView style={globalStyles.modalContent}>
         {/* Backdrop — pressing this closes the modal */}
         <TouchableWithoutFeedback onPress={onClose}>
           <View style={styles.backdrop} />
@@ -142,17 +142,26 @@ const CreateSubscriptionModal = ({
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1"
         >
-          <View className="modal-container">
+          <View>
             {/* Header */}
             <View className="modal-header">
               <Text className="modal-title">New Subscription</Text>
-              <Pressable className="modal-close" onPress={handleClose}>
-                <Text className="modal-close-text">×</Text>
-              </Pressable>
+              <TouchableOpacity
+                style={{
+                  padding: ms(5),
+                  // borderWidth: 1,
+                  alignSelf: "flex-end",
+                  borderRadius: ms(10),
+                  backgroundColor: "#DC2626",
+                }}
+                onPress={handleClose}
+              >
+                <X size={ms(20)} color={colors.background} />
+              </TouchableOpacity>
             </View>
 
             {/* Form Content */}
-            <ScrollView className="modal-body" scrollEnabled>
+            <ScrollView className="" scrollEnabled>
               {/* Name Field */}
               <View className="auth-field">
                 <Text className="auth-label">Subscription Name</Text>
@@ -243,24 +252,23 @@ const CreateSubscriptionModal = ({
               </View>
 
               {/* Submit Button */}
-              <Pressable
+              <CustomButton
+                onPress={handleSubmit}
+                disabled={isSubmitDisabled}
                 className={clsx(
                   "auth-button",
                   isSubmitDisabled && "auth-button-disabled",
                 )}
-                onPress={handleSubmit}
-                disabled={isSubmitDisabled}
-              >
-                <Text className="auth-button-text">Create Subscription</Text>
-              </Pressable>
+                text="Create Subscription"
+              />
 
               {/* Extra padding at bottom for scrolling */}
               <View className="h-6" />
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-      </View>
-    </Modal>
+      </ScrollView>
+    </CustomModal>
   );
 };
 

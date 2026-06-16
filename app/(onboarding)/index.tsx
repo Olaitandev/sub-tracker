@@ -8,38 +8,40 @@
  * - Last step auth buttons → completeOnboarding()
  */
 
+import { colors } from "@/constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
-    ArrowRight,
-    BellRing,
-    Clapperboard,
-    Cloud,
-    CreditCard,
-    Sparkles,
+  ArrowRight,
+  BellRing,
+  Clapperboard,
+  Cloud,
+  CreditCard,
+  Sparkles,
 } from "lucide-react-native";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import {
-    Dimensions,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    ViewToken,
+  Dimensions,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewToken,
 } from "react-native";
 import Animated, {
-    interpolate,
-    interpolateColor,
-    useAnimatedScrollHandler,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
+  interpolate,
+  interpolateColor,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ms } from "react-native-size-matters";
+import { ms, vs } from "react-native-size-matters";
 
 const STORAGE_KEY = "subtrack:onboarding";
 
@@ -186,7 +188,11 @@ function Toggle({ value, onPress }: { value: boolean; onPress: () => void }) {
     transform: [{ translateX: x.value }],
   }));
   const trackStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(bg.value, [0, 1], ["#d1d5db", "#ea7a53"]),
+    backgroundColor: interpolateColor(
+      bg.value,
+      [0, 1],
+      ["#d1d5db", colors.accent],
+    ),
   }));
 
   return (
@@ -311,7 +317,7 @@ function Slide({
             />
             <View
               style={{ width: ms(180), height: ms(200) }}
-              className="p-4  rounded-3xl bg-linear-to-r from-[#de9b84] via-[#ef8b6a] to-accent flex flex-col justify-between z-30 shadow-2xl"
+              className="p-4  rounded-3xl bg-linear-to-br from-[#00C889]  via-accent to-[#00A16C] flex flex-col justify-between z-30 shadow-2xl"
             >
               <View className="flex flex-row justify-between">
                 <Sparkles color="#ffffff80" className="text-white/50" />
@@ -334,29 +340,29 @@ function Slide({
           <View className="flex gap-3">
             <View className=" bg-white shadow-2xl w-[300px] h-[70px] rounded-2xl flex flex-row gap-3 items-center px-3">
               <View className="bg-accent/10 h-[40px] w-[40px] flex items-center justify-center rounded-full">
-                <BellRing color="#ea7a53" />
+                <BellRing color={colors.accent} />
               </View>
               <View>
                 <Text className="font-semibold ">Spotify Premium</Text>
-                <Text className="text-sm text-red-500">Due in 2 days</Text>
+                <Text className="text-sm text-destructive">Due in 2 days</Text>
               </View>
             </View>
             <View className=" bg-white shadow-2xl w-[300px] h-[70px] rounded-2xl flex flex-row gap-3 items-center px-3">
               <View className="bg-accent/10 h-[40px] w-[40px] flex items-center justify-center rounded-full">
-                <Clapperboard color="#ea7a53" />
+                <Clapperboard color={colors.accent} />
               </View>
               <View>
                 <Text className="font-semibold ">Netflix Premium</Text>
-                <Text className="text-sm text-red-500">Due in 5 days</Text>
+                <Text className="text-sm text-destructive">Due in 5 days</Text>
               </View>
             </View>
             <View className=" bg-white shadow-2xl w-[300px] h-[70px] rounded-2xl flex flex-row gap-3 items-center px-3">
               <View className="bg-accent/10 h-[40px] w-[40px] flex items-center justify-center rounded-full">
-                <Cloud color="#ea7a53" />
+                <Cloud color={colors.accent} />
               </View>
               <View>
                 <Text className="font-semibold ">iCloud + Storage</Text>
-                <Text className="text-sm text-red-500">Due in 9 days</Text>
+                <Text className="text-sm text-destructive">Due in 9 days</Text>
               </View>
             </View>
           </View>
@@ -425,7 +431,7 @@ function Slide({
         <Animated.View className="relative items-center justify-center flex-1 mx-5">
           <View>
             <View className="h-[100px] justify-center flex items-center w-[100px] bg-accent/10 rounded-2xl shadow-2xl">
-              <BellRing size={40} color="#ea7a53" />
+              <BellRing size={40} color={colors.accent} />
             </View>
           </View>
           <Animated.View
@@ -446,18 +452,23 @@ function Slide({
       {/* ── Copy (staggered parallax) ── */}
       <View
         className="flex flex-col items-center gap-4 text-center pt-30"
-        style={{ marginBottom: 120 }}
+        style={{
+          marginBottom: vs(90),
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         <Animated.Text
-          style={eyebrowStyle}
-          className="text-[12px] leading-4 font-semibold text-accent"
+          style={[eyebrowStyle, { fontSize: ms(12), lineHeight: ms(20) }]}
+          className="font-semibold text-center text-accent text-nowrap"
+          numberOfLines={1}
         >
           {step.eyebrow.toUpperCase()}
         </Animated.Text>
 
         <Animated.Text
           style={[styles.title, titleStyle]}
-          className="text-center"
+          className="text-center "
         >
           {step.title}
         </Animated.Text>
@@ -519,83 +530,86 @@ export default function OnboardingScreen() {
   const currentStep = STEPS[activeIndex];
 
   return (
-    <SafeAreaView style={styles.root} className="bg-background">
-      {/* ── Header ── */}
-      <View style={styles.header}>
-        <View style={styles.logo}>
-          <View className="rounded-full bg-accent w-[32px] h-[32px] justify-center items-center">
-            <Text style={styles.logoMarkTxt}>
-              <CreditCard color="white" />
-            </Text>
+    <View className="bg-background" style={styles.root}>
+      <SafeAreaView style={styles.root}>
+        <StatusBar hidden />
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <View style={styles.logo}>
+            <View className="rounded-full bg-accent w-[32px] h-[32px] justify-center items-center">
+              <Text style={styles.logoMarkTxt}>
+                <CreditCard color="white" />
+              </Text>
+            </View>
+            <Text style={styles.logoTxt}>SubTrack</Text>
           </View>
-          <Text style={styles.logoTxt}>SubTrack</Text>
-        </View>
 
-        {!isLast && (
-          <Pressable
-            hitSlop={12}
-            onPress={handleSkip}
+          {!isLast && (
+            <Pressable
+              hitSlop={12}
+              onPress={handleSkip}
+              accessibilityRole="button"
+              accessibilityLabel="Skip onboarding"
+            >
+              <Text className="text-gray-500 text-md">Skip</Text>
+            </Pressable>
+          )}
+        </View>
+        {/* ── Slides ── */}
+        <Animated.FlatList
+          ref={listRef}
+          data={STEPS}
+          keyExtractor={(s) => s.id}
+          renderItem={({ item, index }) => (
+            <Slide
+              step={item}
+              index={index}
+              scrollX={scrollX}
+              notifOn={notifOn}
+              onToggle={toggleNotif}
+            />
+          )}
+          horizontal
+          pagingEnabled
+          bounces={false}
+          showsHorizontalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={scrollHandler}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+          getItemLayout={getItemLayout}
+        />
+        {/* ── Footer ── */}
+        <View style={styles.footer}>
+          <View style={styles.dots} className="items-center justify-center ">
+            {STEPS.map((_, i) => (
+              <Dot key={i} index={i} scrollX={scrollX} accent={colors.accent} />
+            ))}
+          </View>
+
+          <TouchableOpacity
+            onPress={isLast ? completeOnboarding : goNext}
+            style={styles.cta}
             accessibilityRole="button"
-            accessibilityLabel="Skip onboarding"
+            // accessibilityLabel={isLast ? "Get started" : "Continue"}
+            className="bg-accent! flex items-center flex-row justify-center gap-2"
           >
-            <Text className="text-gray-500 text-md">Skip</Text>
-          </Pressable>
-        )}
-      </View>
-      {/* ── Slides ── */}
-      <Animated.FlatList
-        ref={listRef}
-        data={STEPS}
-        keyExtractor={(s) => s.id}
-        renderItem={({ item, index }) => (
-          <Slide
-            step={item}
-            index={index}
-            scrollX={scrollX}
-            notifOn={notifOn}
-            onToggle={toggleNotif}
-          />
-        )}
-        horizontal
-        pagingEnabled
-        bounces={false}
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onScroll={scrollHandler}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-        getItemLayout={getItemLayout}
-      />
-      {/* ── Footer ── */}
-      <View style={styles.footer}>
-        <View style={styles.dots} className="items-center justify-center ">
-          {STEPS.map((_, i) => (
-            <Dot key={i} index={i} scrollX={scrollX} accent="#ea7a53" />
-          ))}
-        </View>
-
-        <TouchableOpacity
-          onPress={isLast ? completeOnboarding : goNext}
-          style={styles.cta}
-          accessibilityRole="button"
-          // accessibilityLabel={isLast ? "Get started" : "Continue"}
-          className="bg-accent! flex items-center flex-row justify-center gap-2"
-        >
-          <Text style={styles.ctaTxt}>
-            {/* {isLast
+            <Text style={styles.ctaTxt}>
+              {/* {isLast
               ? "Get Started"
               : activeIndex === 3 && notifOn
                 ? "All set — Continue"
                 : "Next"} */}
 
-            {isLast ? "Get Started" : "Next"}
-          </Text>
-          <ArrowRight color="white" size={20} />
-        </TouchableOpacity>
+              {isLast ? "Get Started" : "Next"}
+            </Text>
+            <ArrowRight color="white" size={20} />
+          </TouchableOpacity>
 
-        <Text style={styles.hint}>Swipe to explore</Text>
-      </View>
-    </SafeAreaView>
+          <Text style={styles.hint}>Swipe to explore</Text>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -687,8 +701,8 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111827",
     letterSpacing: -0.8,
-    lineHeight: 30,
-    // marginBottom: 10,
+    lineHeight: vs(29),
+    // marginBottom: vs(10),
   },
   body: {
     fontSize: 15,

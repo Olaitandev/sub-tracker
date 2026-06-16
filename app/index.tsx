@@ -12,13 +12,14 @@ export default function Index() {
   const { isLoaded, isSignedIn } = useAuth();
   const [ready, setReady] = useState(false);
 
+  const [timerDone, setTimerDone] = useState(false);
   useEffect(() => {
-    const timer = setTimeout(() => setReady(true), 2000); // 2 seconds
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setTimerDone(true), 1500);
+    return () => clearTimeout(t);
   }, []);
 
   // Show splash while Clerk is loading OR timer hasn't finished
-  if (!isLoaded || !ready) {
+  if (!isLoaded || !timerDone) {
     return (
       <SafeAreaView className="items-center justify-center flex-1 bg-accent">
         <View className="flex flex-col ">
