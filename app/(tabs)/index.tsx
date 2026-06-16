@@ -37,14 +37,6 @@ export default function App() {
   const [addSubscriptionModal, setAddSubscriptionModal] = useState(false);
 
   const subscriptionSelected = () => {
-    // Check if store exists before routing
-    // if (!storeExists) {
-    //   showError("Store Not Found", "Set up your store before adding products.");
-    //   closeProductModal();
-    //   return;
-    // }
-
-    // console.log(selected);
     switch (selected) {
       case "subscription":
         // router.push("/(dashboard)/screens/AddDigitalProduct");
@@ -127,7 +119,7 @@ export default function App() {
                           Good Morning, {HOME_USER.name} 👋
                         </Text>
                         <Text className="" style={styles.profileNameSubtitle}>
-                          Here's your subscription overview
+                          Here&apos;s your subscription overview
                         </Text>
                       </View>
                     </View>

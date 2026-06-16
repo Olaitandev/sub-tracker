@@ -93,7 +93,7 @@ const AddSubscriptionModal: React.FC<Props> = ({
               >
                 <View style={{ gap: ms(15) }}>
                   {/* icon */}
-                  <Text>{subscription.icon}</Text>
+                  <View>{subscription.icon}</View>
                   {/* name */}
                   <View style={{ gap: ms(5) }}>
                     <Text style={styles.title}>{subscription.title}</Text>

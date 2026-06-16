@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { ms, s, vs } from "react-native-size-matters";
 
 export const colors = {
-  background: "#fff9e3",
+  background: "#f9fafc",
   foreground: "#081126",
   card: "#fff8e7",
   muted: "#f6eecf",

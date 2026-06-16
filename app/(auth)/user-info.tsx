@@ -1,5 +1,5 @@
 import { globalStyles } from "@/constants/theme";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { styled } from "nativewind";
 import { useState } from "react";
@@ -45,12 +45,16 @@ const UserInfo = () => {
   const isFormValid =
     fullName.trim().length >= 2 && selectedCurrency.length > 0;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitted(true);
     setLoading(true);
     if (!isFormValid) return;
 
-    // proceed
+    try {
+      router.replace("/(tabs)");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -146,7 +150,7 @@ const UserInfo = () => {
                   text="Continue"
                   disabled={!isFormValid}
                   loading={loading}
-                ></CustomButton>
+                />
               </View>
             </View>
 

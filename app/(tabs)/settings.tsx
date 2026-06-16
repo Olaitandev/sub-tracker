@@ -16,7 +16,6 @@ const Settings = () => {
     posthog.capture("user_signed_out");
     posthog.reset();
     await signOut();
-    // router.replace("/(auth)/sign-in" as Href);
     router.replace("/" as Href);
   };
 

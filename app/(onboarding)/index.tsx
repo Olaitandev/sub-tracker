@@ -495,6 +495,10 @@ export default function OnboardingScreen() {
     },
   });
 
+  const viewabilityConfig = useRef({
+    viewAreaCoveragePercentThreshold: 50,
+  }).current;
+
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const idx = viewableItems[0]?.index;
@@ -576,7 +580,7 @@ export default function OnboardingScreen() {
           scrollEventThrottle={16}
           onScroll={scrollHandler}
           onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+          viewabilityConfig={viewabilityConfig}
           getItemLayout={getItemLayout}
         />
         {/* ── Footer ── */}
@@ -591,8 +595,7 @@ export default function OnboardingScreen() {
             onPress={isLast ? completeOnboarding : goNext}
             style={styles.cta}
             accessibilityRole="button"
-            // accessibilityLabel={isLast ? "Get started" : "Continue"}
-            className="bg-accent! flex items-center flex-row justify-center gap-2"
+            className="flex flex-row items-center justify-center gap-2 bg-accent"
           >
             <Text style={styles.ctaTxt}>
               {/* {isLast

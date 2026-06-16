@@ -1,6 +1,6 @@
 import CustomModal from "@/components/ui/CustomModal";
 import { colors, globalStyles } from "@/constants/theme";
-import { formatSubscriptionDateTime } from "@/lib/utils";
+import { formatCurrency, formatSubscriptionDateTime } from "@/lib/utils";
 import {
   BellRing,
   CalendarPlus,
@@ -75,7 +75,10 @@ const UpcomingSubscriptionModal = ({
                 {selectedSubscription.name}
               </Text>
               <Text style={{ fontFamily: "sans-bold", fontSize: ms(25) }}>
-                ${selectedSubscription.price}
+                {formatCurrency(
+                  selectedSubscription.price,
+                  selectedSubscription.currency,
+                )}
               </Text>
             </View>
             {/* <View className="flex items-center justify-center ">

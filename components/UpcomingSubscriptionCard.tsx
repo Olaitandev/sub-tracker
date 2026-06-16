@@ -50,7 +50,7 @@ const UpcomingSubscriptionCard = ({
             </Text>
             <Text
               numberOfLines={1}
-              ellipsizeMode=""
+              // ellipsizeMode=""
               style={{ color: colors.gray, fontSize: ms(9) }}
             >
               {category?.trim() ||
