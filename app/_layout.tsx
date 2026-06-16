@@ -13,6 +13,7 @@ import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { PostHogProvider } from "posthog-react-native";
 
+import { PaperProvider } from "react-native-paper";
 import { posthog } from "../src/config/posthog";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -86,16 +87,19 @@ export default function RootLayout() {
           propsToCapture: ["testID"],
         }}
       >
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "fade_from_bottom",
-            animationDuration: 200,
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
-          <Stack.Screen name="(onboarding)" options={{ animation: "fade" }} />
-        </Stack>
+        <PaperProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "fade_from_bottom",
+              animationDuration: 200,
+            }}
+          >
+            <Stack.Screen name="index" options={{ animation: "fade" }} />
+            <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+            <Stack.Screen name="(onboarding)" options={{ animation: "fade" }} />
+          </Stack>
+        </PaperProvider>
       </PostHogProvider>
     </ClerkProvider>
   );

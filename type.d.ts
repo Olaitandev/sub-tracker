@@ -38,21 +38,34 @@ declare global {
 
   interface UpcomingSubscription {
     id: string;
-    icon: ImageSourcePropType;
+    icon?: ImageSourcePropType;
     name: string;
+    plan?: string;
+    category?: string;
+    paymentMethod?: string;
+    status?: string;
+    startDate?: string;
     price: number;
     currency?: string;
-    daysLeft: number;
+    billing: string;
+    frequency?: string;
+    renewalDate?: string;
+    color?: string;
   }
 
   interface UpcomingSubscriptionCardProps extends Omit<
     UpcomingSubscription,
     "id"
-  > {}
+  > {
+    expanded: boolean;
+    onPress: () => void;
+    onCancelPress?: () => void;
+    isCancelling?: boolean;
+  }
 
   interface ListHeadingProps {
     title: string;
   }
 }
 
-export { };
+export {};

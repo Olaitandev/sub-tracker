@@ -2,17 +2,18 @@ import { StyleSheet } from "react-native";
 import { ms, s, vs } from "react-native-size-matters";
 
 export const colors = {
-  background: "#fff9e3",
+  background: "#f9fafc",
   foreground: "#081126",
   card: "#fff8e7",
   muted: "#f6eecf",
   mutedForeground: "rgba(0, 0, 0, 0.6)",
   primary: "#081126",
-  accent: "#ea7a53",
+  accent: "#13AD74",
   border: "rgba(0, 0, 0, 0.1)",
   success: "#16a34a",
   destructive: "#dc2626",
   subscription: "#8fd1bd",
+  gray: "#8FA1B9",
 } as const;
 
 export const spacing = {
@@ -53,7 +54,7 @@ export const globalStyles = StyleSheet.create({
   primaryButton: {
     backgroundColor: colors.accent,
     paddingVertical: vs(12),
-    borderRadius: ms(10),
+    borderRadius: ms(12),
     alignItems: "center",
     justifyContent: "center",
     // marginTop: hp(2.5),
@@ -72,7 +73,7 @@ export const globalStyles = StyleSheet.create({
     fontSize: ms(13),
     fontWeight: "500",
     color: "#ffffff",
-    // fontFamily: FONTS.medium,
+    fontFamily: "sans-bold",
   },
   disabled: {
     opacity: 0.5,
@@ -86,7 +87,7 @@ export const globalStyles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#fff",
-    padding: 20,
+    paddingHorizontal: ms(20),
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingBottom: vs(25),

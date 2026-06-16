@@ -1,47 +1,46 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    Dimensions,
-    Modal,
-    PanResponder,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    View,
+  Dimensions,
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 import Animated, {
-    Extrapolation,
-    interpolate,
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
+  Extrapolation,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SPRING_CONFIG = { damping: 20, stiffness: 200, mass: 0.8 };
 const DISMISS_THRESHOLD = 80;
 
-interface BottomSheetProps {
+interface CustomModalProps {
   visible: boolean;
   onClose: () => void;
   children: React.ReactNode;
   scrollable?: boolean;
 }
 
-export default function BottomSheet({
+export default function CustomModal({
   visible,
   onClose,
   children,
   scrollable = false,
-}: BottomSheetProps) {
+}: CustomModalProps) {
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const backdropOpacity = useSharedValue(0);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Track drag position using a plain ref so PanResponder can read/write
-  // it synchronously without going through the Reanimated worklet bridge
   const dragY = useRef(0);
+  const isClosing = useRef(false);
 
   const animateOpen = useCallback(() => {
     translateY.value = SCREEN_HEIGHT;
@@ -60,21 +59,30 @@ export default function BottomSheet({
     });
   }, []);
 
+  // Single entry point for closing — always animates first, then notifies parent
+  const handleClose = useCallback(() => {
+    if (isClosing.current) return;
+    isClosing.current = true;
+    animateClose(() => {
+      setModalVisible(false);
+      isClosing.current = false;
+      onClose();
+    });
+  }, [animateClose, onClose]);
+
   useEffect(() => {
     if (visible) {
+      isClosing.current = false;
       setModalVisible(true);
       requestAnimationFrame(animateOpen);
-    } else {
-      animateClose(() => setModalVisible(false));
+    } else if (modalVisible && !isClosing.current) {
+      // visible became false from outside (e.g. parent-driven close)
+      handleClose();
     }
   }, [visible]);
 
-  // ── PanResponder on the drag handle only ────────────────────────────────
-  // Keeping it on the handle means it NEVER intercepts taps on the buttons
-  // below. The handle has no tappable children so aggressive capture is fine.
   const panResponder = useRef(
     PanResponder.create({
-      // Claim the responder as soon as the finger starts moving on the handle
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
 
@@ -86,7 +94,6 @@ export default function BottomSheet({
         const dy = gestureState.dy;
         if (dy > 0) {
           dragY.current = dy;
-          // Drive the Reanimated translateY directly from the gesture
           translateY.value = dy;
           backdropOpacity.value = interpolate(
             dy,
@@ -100,10 +107,8 @@ export default function BottomSheet({
       onPanResponderRelease: (_, gestureState) => {
         const { dy, vy } = gestureState;
         if (dy > DISMISS_THRESHOLD || vy > 0.8) {
-          // Fast enough or far enough — dismiss
-          onClose();
+          handleClose();
         } else {
-          // Snap back
           translateY.value = withSpring(0, SPRING_CONFIG);
           backdropOpacity.value = withTiming(1, { duration: 150 });
         }
@@ -111,7 +116,6 @@ export default function BottomSheet({
       },
 
       onPanResponderTerminate: () => {
-        // If the responder is stolen (e.g. by a ScrollView), snap back
         translateY.value = withSpring(0, SPRING_CONFIG);
         backdropOpacity.value = withTiming(1, { duration: 150 });
         dragY.current = 0;
@@ -133,25 +137,24 @@ export default function BottomSheet({
       transparent
       animationType="none"
       statusBarTranslucent
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
-      {/* Backdrop */}
       <Animated.View
         style={[styles.backdrop, backdropStyle]}
         pointerEvents="auto"
       >
-        <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose} />
+        <Pressable
+          style={StyleSheet.absoluteFillObject}
+          onPress={handleClose}
+        />
       </Animated.View>
 
-      {/* Sheet */}
       <View style={styles.sheetWrapper} pointerEvents="box-none">
         <Animated.View style={[styles.sheetContainer, sheetStyle]}>
-          {/* Drag handle — PanResponder lives here only */}
           <View {...panResponder.panHandlers} style={styles.dragHandleWrapper}>
             <View style={styles.dragHandle} />
           </View>
 
-          {/* Children receive touches normally — no gesture interference */}
           {scrollable ? (
             <ScrollView
               bounces={false}
@@ -172,7 +175,7 @@ export default function BottomSheet({
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
   sheetWrapper: {
     ...StyleSheet.absoluteFillObject,

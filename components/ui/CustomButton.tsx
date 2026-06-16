@@ -1,40 +1,45 @@
 import React from "react";
 import {
-    ActivityIndicator,
-    GestureResponderEvent,
-    StyleProp,
-    Text,
-    TextStyle,
-    TouchableOpacity,
-    ViewStyle,
+  ActivityIndicator,
+  GestureResponderEvent,
+  StyleProp,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
 } from "react-native";
 import { globalStyles } from "../../constants/theme";
 
-interface PrimaryButtonProps {
+interface CustomButtonProps {
   text?: string;
   onPress: (event: GestureResponderEvent) => void;
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  className?: string;
   children?: React.ReactNode;
   textStyle?: StyleProp<TextStyle>;
+  textClassName?: string;
   type?: string;
 }
 
-const PrimaryButton: React.FC<PrimaryButtonProps> = ({
+const CustomButton: React.FC<CustomButtonProps> = ({
   text,
   onPress,
   loading = false,
   disabled = false,
   style,
+  className,
   children,
   textStyle,
+  textClassName,
   type,
 }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
+      className={className}
       style={[
         type === "secondary"
           ? globalStyles.secondaryButton
@@ -48,10 +53,15 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       ) : children ? (
         children
       ) : (
-        <Text style={[globalStyles.buttonText, textStyle]}>{text}</Text>
+        <Text
+          className={textClassName}
+          style={[globalStyles.buttonText, textStyle]}
+        >
+          {text}
+        </Text>
       )}
     </TouchableOpacity>
   );
 };
 
-export default PrimaryButton;
+export default CustomButton;

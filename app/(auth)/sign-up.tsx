@@ -1,5 +1,7 @@
 import { useAuth, useSignUp } from "@clerk/expo";
 import { Link, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Eye, EyeOff } from "lucide-react-native";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
 import { useState } from "react";
@@ -16,6 +18,7 @@ import {
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { s, vs } from "react-native-size-matters";
+import CustomButton from "../../components/ui/CustomButton";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -24,6 +27,8 @@ const SignUp = () => {
   const { isSignedIn } = useAuth();
   const router = useRouter();
   const posthog = usePostHog();
+  const [loading, setLoading] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -33,6 +38,8 @@ const SignUp = () => {
   // Validation states
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   // Client-side validation
   const emailValid =
@@ -44,7 +51,7 @@ const SignUp = () => {
 
   const handleSubmit = async () => {
     if (!formValid) return;
-
+    setLoading(true);
     const { error } = await signUp.password({
       emailAddress,
       password,
@@ -52,6 +59,7 @@ const SignUp = () => {
 
     if (error) {
       console.error(JSON.stringify(error, null, 2));
+      setLoading(false);
       posthog.capture("user_sign_up_failed", {
         error_message: error.message,
       });
@@ -61,51 +69,16 @@ const SignUp = () => {
     // Send verification email
     if (!error) {
       await signUp.verifications.sendEmailCode();
+      setLoading(false);
     }
   };
 
-  // const handleVerify = async () => {
-  //   await signUp.verifications.verifyEmailCode({
-  //     code,
-  //   });
-
-  //   if (signUp.status === "complete") {
-  //     await signUp.finalize({
-  //       navigate: ({ session, decorateUrl }) => {
-  //         if (session?.currentTask) {
-  //           console.log(session?.currentTask);
-  //           return;
-  //         }
-
-  //         posthog.identify(emailAddress, {
-  //           $set: { email: emailAddress },
-  //           $set_once: { sign_up_date: new Date().toISOString() },
-  //         });
-  //         posthog.capture("user_signed_up", { email: emailAddress });
-
-  //         const url = decorateUrl("/(auth)/user-info");
-  //         if (url.startsWith("http")) {
-  //           // Only use window.location on web platform
-  //           if (typeof window !== "undefined" && window.location) {
-  //             window.location.href = url;
-  //           } else {
-  //             // On native, just use router navigation
-  //             router.replace("/(auth)/user-info");
-  //           }
-  //         } else {
-  //           router.replace(url as Href);
-  //         }
-  //       },
-  //     });
-  //   } else {
-  //     console.error("Sign-up attempt not complete:", signUp);
-  //   }
-  // };
-
   const handleVerify = async () => {
+    setLoading(true);
     await signUp.verifications.verifyEmailCode({
       code,
     });
+
     if (signUp.status === "complete") {
       setNavigating(true);
       await signUp.finalize({
@@ -119,12 +92,18 @@ const SignUp = () => {
           }
 
           router.push("/(auth)/user-info");
+          setLoading(false);
         },
       });
     } else {
       // Check why the sign-up is not complete
       console.error("Sign-up attempt not complete:", signUp);
+      setLoading(false);
     }
+  };
+
+  const handleResendOtp = () => {
+    signUp.verifications.sendEmailCode();
   };
 
   // Don't show anything if already signed in or sign-up is complete
@@ -140,6 +119,7 @@ const SignUp = () => {
   ) {
     return (
       <SafeAreaView className="flex-1">
+        <StatusBar translucent />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1 "
@@ -194,7 +174,7 @@ const SignUp = () => {
                     )}
                   </View>
 
-                  <Pressable
+                  {/* <Pressable
                     className={`auth-button ${(!code || fetchStatus === "fetching") && "auth-button-disabled"}`}
                     onPress={handleVerify}
                     disabled={!code || fetchStatus === "fetching"}
@@ -204,7 +184,14 @@ const SignUp = () => {
                         ? "Verifying..."
                         : "Verify Email"}
                     </Text>
-                  </Pressable>
+                  </Pressable> */}
+
+                  <CustomButton
+                    text="Verify Email"
+                    onPress={handleVerify}
+                    loading={loading}
+                    disabled={!code || fetchStatus === "fetching"}
+                  />
 
                   <Pressable
                     className="auth-secondary-button"
@@ -314,21 +301,40 @@ const SignUp = () => {
 
                 <View className="auth-field">
                   <Text className="auth-label">Password</Text>
-                  <TextInput
-                    className={`auth-input ${passwordTouched && !passwordValid && "auth-input-error"}`}
-                    value={password}
-                    placeholder="Create a strong password"
-                    placeholderTextColor="rgba(0, 0, 0, 0.4)"
-                    secureTextEntry
-                    onChangeText={setPassword}
-                    onBlur={() => setPasswordTouched(true)}
-                    autoComplete="password-new"
-                    onSubmitEditing={handleSubmit}
-                    style={{
-                      paddingHorizontal: s(10),
-                      paddingVertical: vs(10),
-                    }}
-                  />
+                  <View
+                    className={`flex-row items-center border rounded-xl border-border ${
+                      passwordTouched && !passwordValid
+                        ? "border-destructive"
+                        : "border-border"
+                    }`}
+                  >
+                    <TextInput
+                      className="flex-1"
+                      value={password}
+                      placeholder="Create a strong password"
+                      placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                      secureTextEntry={!showPassword}
+                      onChangeText={setPassword}
+                      onBlur={() => setPasswordTouched(true)}
+                      autoComplete="password-new"
+                      onSubmitEditing={handleSubmit}
+                      style={{
+                        paddingHorizontal: s(10),
+                        paddingVertical: vs(10),
+                      }}
+                    />
+                    <Pressable
+                      onPress={() => setShowPassword((prev) => !prev)}
+                      className="px-3"
+                      hitSlop={10}
+                    >
+                      {showPassword ? (
+                        <EyeOff size={20} color="gray" />
+                      ) : (
+                        <Eye size={20} color="gray" />
+                      )}
+                    </Pressable>
+                  </View>
                   {passwordTouched && !passwordValid && (
                     <Text className="auth-error">
                       Password must be at least 8 characters
@@ -346,17 +352,12 @@ const SignUp = () => {
                   )}
                 </View>
 
-                <Pressable
-                  className={`auth-button ${(!formValid || fetchStatus === "fetching") && "auth-button-disabled"}`}
+                <CustomButton
+                  text="Create Account"
                   onPress={handleSubmit}
+                  loading={loading}
                   disabled={!formValid || fetchStatus === "fetching"}
-                >
-                  <Text className="auth-button-text">
-                    {fetchStatus === "fetching"
-                      ? "Creating Account..."
-                      : "Create Account"}
-                  </Text>
-                </Pressable>
+                />
               </View>
             </View>
 
@@ -366,16 +367,6 @@ const SignUp = () => {
               <Link href="/(auth)/sign-in" asChild>
                 <Pressable>
                   <Text className="auth-link">Sign In</Text>
-                </Pressable>
-              </Link>
-            </View>
-
-            {/* test */}
-            <View className="auth-link-row">
-              <Text className="auth-link-copy">Go to get to know you?</Text>
-              <Link href="/(auth)/user-info" asChild>
-                <Pressable>
-                  <Text className="auth-link">Get to know you</Text>
                 </Pressable>
               </Link>
             </View>

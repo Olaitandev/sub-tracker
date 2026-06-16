@@ -1,5 +1,6 @@
 import { globalStyles } from "@/constants/theme";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { styled } from "nativewind";
 import { useState } from "react";
 import {
@@ -15,11 +16,11 @@ import {
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { ms, s, vs } from "react-native-size-matters";
-import Button from "../../components/ui/Button";
+import CustomButton from "../../components/ui/CustomButton";
 import CustomModal from "../../components/ui/CustomModal";
 const SafeAreaView = styled(RNSafeAreaView);
 
-const UserDetails = () => {
+const UserInfo = () => {
   const [fullName, setFullName] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("");
   const [selectedCurrencyIcon, setSelectedCurrencyIcon] = useState("");
@@ -44,16 +45,21 @@ const UserDetails = () => {
   const isFormValid =
     fullName.trim().length >= 2 && selectedCurrency.length > 0;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitted(true);
     setLoading(true);
     if (!isFormValid) return;
 
-    // proceed
+    try {
+      router.replace("/(tabs)");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <SafeAreaView className="flex-1">
+      <StatusBar translucent />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 "
@@ -100,7 +106,7 @@ const UserDetails = () => {
                     }}
                   />
                   {submitted && fullName.trim().length < 2 && (
-                    <Text className="mt-1 text-red-500">
+                    <Text className="mt-1 text-destructive">
                       Please enter your full name
                     </Text>
                   )}
@@ -133,18 +139,18 @@ const UserDetails = () => {
                     <Text className="text-gray-400">⌄</Text>
                   </TouchableOpacity>
                   {submitted && !selectedCurrency && (
-                    <Text className="mt-1 text-red-500">
+                    <Text className="mt-1 text-destructive">
                       Please select a currency
                     </Text>
                   )}
                 </View>
 
-                <Button
+                <CustomButton
                   onPress={handleSubmit}
                   text="Continue"
                   disabled={!isFormValid}
                   loading={loading}
-                ></Button>
+                />
               </View>
             </View>
 
@@ -209,7 +215,7 @@ const UserDetails = () => {
   );
 };
 
-export default UserDetails;
+export default UserInfo;
 
 const styles = StyleSheet.create({
   currencyText: {
