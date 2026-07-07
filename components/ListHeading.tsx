@@ -6,17 +6,19 @@ const ListHeading = ({
   title,
   subtitle,
   disabled,
+  onPress,
 }: {
   title: string;
   subtitle: string;
   disabled?: boolean;
+  onPress: () => void;
 }) => {
   return (
     <View className="" style={styles.listHeadingContainer}>
       <Text className="" style={styles.listHeadingTitle}>
         {title}
       </Text>
-      <TouchableOpacity className="" disabled={disabled}>
+      <TouchableOpacity className="" disabled={disabled} onPress={onPress}>
         <Text
           style={styles.listHeadingSubtitle}
           className={disabled ? "text-black!" : ""}
@@ -40,11 +42,11 @@ const styles = StyleSheet.create({
   },
   listHeadingTitle: {
     fontFamily: "sans-bold",
-    fontSize: ms(19),
+    fontSize: ms(16),
   },
   listHeadingSubtitle: {
     fontFamily: "sans-bold",
-    fontSize: ms(13),
+    fontSize: ms(12),
     color: colors.accent,
   },
 });

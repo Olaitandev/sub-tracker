@@ -1,3 +1,4 @@
+import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useAuth } from "@clerk/expo";
 import { Redirect } from "expo-router";
 import { styled } from "nativewind";
@@ -10,7 +11,7 @@ const SafeAreaView = styled(RNSafeAreaView);
 
 export default function Index() {
   const { isLoaded, isSignedIn } = useAuth();
-  const [ready, setReady] = useState(false);
+  const onboardingStatus = useOnboardingStatus();
 
   const [timerDone, setTimerDone] = useState(false);
   useEffect(() => {
@@ -18,14 +19,12 @@ export default function Index() {
     return () => clearTimeout(t);
   }, []);
 
-  // Show splash while Clerk is loading OR timer hasn't finished
-  if (!isLoaded || !timerDone) {
+  if (!isLoaded || !timerDone || onboardingStatus === "loading") {
     return (
       <SafeAreaView className="items-center justify-center flex-1 bg-accent">
-        <View className="flex flex-col ">
+        <View className="flex flex-col">
           <Image
             source={require("@/assets/images/splash-pattern.png")}
-            className=""
             resizeMode="contain"
             style={{ width: s(460), height: vs(400) }}
           />
@@ -37,9 +36,20 @@ export default function Index() {
     );
   }
 
-  if (isSignedIn) {
-    return <Redirect href="/(tabs)" />;
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
   }
 
-  return <Redirect href="/(onboarding)" />;
+  if (onboardingStatus === "incomplete") {
+    return (
+      <Redirect
+        href={{
+          pathname: "/(auth)/user-info",
+          params: { entry: "complete_onboarding" },
+        }}
+      />
+    );
+  }
+
+  return <Redirect href="/(tabs)" />;
 }

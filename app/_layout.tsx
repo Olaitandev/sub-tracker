@@ -13,7 +13,9 @@ import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { PostHogProvider } from "posthog-react-native";
 
+import { CustomToast } from "@/components/ui/NotificationService";
 import { PaperProvider } from "react-native-paper";
+import { ToastProvider } from "react-native-toast-notifications";
 import { posthog } from "../src/config/posthog";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -77,17 +79,27 @@ export default function RootLayout() {
         }}
       >
         <PaperProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: "fade_from_bottom",
-              animationDuration: 200,
-            }}
+          <ToastProvider
+            renderToast={(toast) => <CustomToast toast={toast} />}
+            offset={50}
+            offsetTop={50}
           >
-            <Stack.Screen name="index" options={{ animation: "fade" }} />
-            <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
-            <Stack.Screen name="(onboarding)" options={{ animation: "fade" }} />
-          </Stack>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "fade_from_bottom",
+                animationDuration: 200,
+              }}
+            >
+              <Stack.Screen name="index" options={{ animation: "fade" }} />
+              <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+              <Stack.Screen
+                name="(onboarding)"
+                options={{ animation: "fade" }}
+              />
+              <Stack.Screen name="(auth)" options={{ animation: "fade" }} />
+            </Stack>
+          </ToastProvider>
         </PaperProvider>
       </PostHogProvider>
     </ClerkProvider>
