@@ -1,7 +1,8 @@
+import { colors, globalStyles } from "@/constants/theme";
 import { useAuth, useSignUp } from "@clerk/expo";
 import { Link, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Eye, EyeOff } from "lucide-react-native";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react-native";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
 import { useState } from "react";
@@ -17,7 +18,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { s, vs } from "react-native-size-matters";
+import { ms, s, vs } from "react-native-size-matters";
 import CustomButton from "../../components/ui/CustomButton";
 
 const SafeAreaView = styled(RNSafeAreaView);
@@ -28,6 +29,7 @@ const SignUp = () => {
   const router = useRouter();
   const posthog = usePostHog();
   const [loading, setLoading] = useState(false);
+  const [loadingOtp, setLoadingOtp] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -91,7 +93,10 @@ const SignUp = () => {
             return;
           }
 
-          router.push("/(auth)/user-info");
+          router.push({
+            pathname: "/(auth)/user-info",
+            params: { entry: "sign_up" },
+          });
           setLoading(false);
         },
       });
@@ -102,8 +107,15 @@ const SignUp = () => {
     }
   };
 
-  const handleResendOtp = () => {
-    signUp.verifications.sendEmailCode();
+  const handleResendOtp = async () => {
+    setLoadingOtp(true);
+    try {
+      await signUp.verifications.sendEmailCode();
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setLoadingOtp(false);
+    }
   };
 
   // Don't show anything if already signed in or sign-up is complete
@@ -118,7 +130,10 @@ const SignUp = () => {
     signUp.missingFields.length === 0
   ) {
     return (
-      <SafeAreaView className="flex-1">
+      <SafeAreaView
+        className="flex-1 bg-background"
+        style={globalStyles.bodyPadding}
+      >
         <StatusBar translucent />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -129,7 +144,24 @@ const SignUp = () => {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View className="auth-content">
+            <View>
+              <TouchableOpacity
+                onPress={() => signUp.reset()}
+                style={{
+                  borderWidth: 1,
+                  // padding: ms(5),
+                  width: ms(30),
+                  height: ms(30),
+                  alignItems: "center",
+                  borderRadius: ms(10),
+                  justifyContent: "center",
+                  backgroundColor: colors.primary,
+                }}
+              >
+                <ChevronLeft color="#fff" />
+              </TouchableOpacity>
+            </View>
+            <View style={{ paddingTop: ms(10), flexGrow: 1 }}>
               {/* Branding */}
               <View className="auth-brand-block">
                 <View className="auth-logo-wrap">
@@ -145,11 +177,6 @@ const SignUp = () => {
                 <Text className="auth-subtitle">
                   We sent a verification code to {emailAddress}
                 </Text>
-              </View>
-              <View>
-                <TouchableOpacity onPress={() => signUp.reset()}>
-                  <Text>Go back</Text>
-                </TouchableOpacity>
               </View>
 
               {/* Verification Form */}
@@ -190,10 +217,20 @@ const SignUp = () => {
                     text="Verify Email"
                     onPress={handleVerify}
                     loading={loading}
-                    disabled={!code || fetchStatus === "fetching"}
+                    disabled={
+                      !code || code.length < 6 || fetchStatus === "fetching"
+                    }
                   />
 
-                  <Pressable
+                  <CustomButton
+                    text="Resend Code"
+                    onPress={handleResendOtp}
+                    loading={loadingOtp}
+                    disabled={fetchStatus === "fetching"}
+                    type="secondary"
+                  />
+
+                  {/* <Pressable
                     className="auth-secondary-button"
                     onPress={() => signUp.verifications.sendEmailCode()}
                     disabled={fetchStatus === "fetching"}
@@ -201,7 +238,7 @@ const SignUp = () => {
                     <Text className="auth-secondary-button-text">
                       Resend Code
                     </Text>
-                  </Pressable>
+                  </Pressable> */}
                 </View>
               </View>
             </View>
@@ -239,7 +276,7 @@ const SignUp = () => {
 
   // Main sign-up form
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"

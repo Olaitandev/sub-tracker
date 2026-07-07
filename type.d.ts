@@ -5,28 +5,12 @@ declare global {
     name: string;
     title: string;
     icon: ImageSourcePropType;
+    tourDescription: string;
   }
 
   interface TabIconProps {
     focused: boolean;
     icon: ImageSourcePropType;
-  }
-
-  interface Subscription {
-    id: string;
-    icon: ImageSourcePropType;
-    name: string;
-    plan?: string;
-    category?: string;
-    paymentMethod?: string;
-    status?: string;
-    startDate?: string;
-    price: number;
-    currency?: string;
-    billing: string;
-    frequency?: string;
-    renewalDate?: string;
-    color?: string;
   }
 
   interface SubscriptionCardProps extends Omit<Subscription, "id"> {
@@ -66,6 +50,29 @@ declare global {
   interface ListHeadingProps {
     title: string;
   }
+  type SubscriptionStatus = "active" | "paused" | "cancelled";
+
+  interface Subscription {
+    id: string;
+    icon?: ImageSourcePropType;
+    service_name: string;
+    plan?: string;
+    category?: string;
+    payment_method?: string;
+    start_date?: string;
+    amount: number;
+    currency_code?: string;
+    billing_cycle: string;
+    next_renewal_date?: string;
+    color?: string;
+    status: SubscriptionStatus;
+    notes?: string;
+    icon_id?: string | null;
+    icon_color?: string | null;
+    icon_initials?: string | null;
+    notifications?: string[];
+    notifications_enabled?: boolean;
+  }
 }
 
-export {};
+export { Subscription, SubscriptionStatus };

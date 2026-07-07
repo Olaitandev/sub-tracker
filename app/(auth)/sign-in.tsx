@@ -1,5 +1,6 @@
+import { checkOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useSignIn } from "@clerk/expo";
-import { Link, useRouter, type Href } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Eye, EyeOff } from "lucide-react-native";
 import { styled } from "nativewind";
@@ -22,21 +23,18 @@ const SafeAreaView = styled(RNSafeAreaView);
 
 const SignIn = () => {
   const { signIn, errors, fetchStatus } = useSignIn();
-  const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
   const posthog = usePostHog();
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-
-  // Validation states
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
 
-  // Client-side validation
   const emailValid =
     emailAddress.length === 0 ||
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress);
@@ -44,66 +42,61 @@ const SignIn = () => {
   const formValid =
     emailAddress.length > 0 && password.length > 0 && emailValid;
 
+  // Called after Clerk confirms sign-in is complete.
+  // Checks SecureStore first (instant for returning users), falls back to
+  // network once if needed. Never goes through index.tsx — no splash replay.
+  const onSignInComplete = async (
+    sessionUserId: string,
+    sessionGetToken: () => Promise<string | null>,
+  ) => {
+    posthog.identify(emailAddress, {
+      $set: { email: emailAddress },
+      $set_once: { first_sign_in_date: new Date().toISOString() },
+    });
+    posthog.capture("user_signed_in", { email: emailAddress });
+
+    const status = await checkOnboardingStatus(sessionUserId, sessionGetToken);
+
+    if (status === "complete") {
+      router.replace({ pathname: "/(tabs)", params: { entry: "sign_in" } });
+    } else {
+      router.replace("/(auth)/user-info");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!formValid) return;
     setLoading(true);
-    const { error } = await signIn.password({
-      emailAddress,
-      password,
-    });
+
+    const { error } = await signIn.password({ emailAddress, password });
 
     if (error) {
       console.error(JSON.stringify(error, null, 2));
       setLoading(false);
-      posthog.capture("user_sign_in_failed", {
-        error_message: error.message,
-      });
+      posthog.capture("user_sign_in_failed", { error_message: error.message });
       return;
     }
 
     if (signIn.status === "complete") {
       await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session?.currentTask);
-            return;
-          }
-
-          posthog.identify(emailAddress, {
-            $set: { email: emailAddress },
-            $set_once: { first_sign_in_date: new Date().toISOString() },
-          });
-          posthog.capture("user_signed_in", { email: emailAddress });
-
-          const url = decorateUrl("/(tabs)");
-          if (url.startsWith("http")) {
-            // Only use window.location on web platform
-            if (typeof window !== "undefined" && window.location) {
-              window.location.href = url;
-            } else {
-              // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
-            }
-          } else {
-            router.replace(url as Href);
-          }
+        navigate: async ({ session }) => {
+          if (!session || session.currentTask) return;
+          await onSignInComplete(
+            session!.user.id,
+            session!.getToken.bind(session),
+          );
         },
       });
-    } else if (signIn.status === "needs_second_factor") {
-      // Handle MFA if needed (not implemented in this basic flow)
-      console.log("MFA required");
     } else if (signIn.status === "needs_client_trust") {
-      // Send email code for client trust verification
       const emailCodeFactor = signIn.supportedSecondFactors.find(
-        (factor) => factor.strategy === "email_code",
+        (f) => f.strategy === "email_code",
       );
-
-      if (emailCodeFactor) {
-        await signIn.mfa.sendEmailCode();
-      }
+      if (emailCodeFactor) await signIn.mfa.sendEmailCode();
     } else {
       console.error("Sign-in attempt not complete:", signIn);
     }
+
+    setLoading(false);
   };
 
   const handleVerify = async () => {
@@ -111,41 +104,22 @@ const SignIn = () => {
 
     if (signIn.status === "complete") {
       await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session?.currentTask);
-            return;
-          }
-
-          posthog.identify(emailAddress, {
-            $set: { email: emailAddress },
-            $set_once: { first_sign_in_date: new Date().toISOString() },
-          });
-          posthog.capture("user_signed_in", { email: emailAddress });
-
-          const url = decorateUrl("/(tabs)");
-          if (url.startsWith("http")) {
-            // Only use window.location on web platform
-            if (typeof window !== "undefined" && window.location) {
-              window.location.href = url;
-            } else {
-              // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
-            }
-          } else {
-            router.replace(url as Href);
-          }
+        navigate: async ({ session }) => {
+          if (session?.currentTask) return;
+          await onSignInComplete(
+            session!.user.id,
+            session!.getToken.bind(session),
+          );
         },
       });
     } else {
-      console.error("Sign-in attempt not complete:", signIn);
+      console.error("Sign-in verify not complete:", signIn);
     }
   };
 
-  // Show verification screen if client trust is needed
   if (signIn.status === "needs_client_trust") {
     return (
-      <SafeAreaView className="flex-1">
+      <SafeAreaView className="flex-1 bg-background">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1"
@@ -156,7 +130,6 @@ const SignIn = () => {
             showsVerticalScrollIndicator={false}
           >
             <View className="auth-content">
-              {/* Branding */}
               <View className="auth-brand-block">
                 <View className="auth-logo-wrap">
                   <View className="auth-logo-mark">
@@ -169,7 +142,6 @@ const SignIn = () => {
                 </Text>
               </View>
 
-              {/* Verification Form */}
               <View className="p-5 mt-16 border rounded-3xl border-border">
                 <View className="auth-form">
                   <View className="auth-field">
@@ -229,9 +201,8 @@ const SignIn = () => {
     );
   }
 
-  // Main sign-in form
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-background">
       <StatusBar translucent />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -243,7 +214,6 @@ const SignIn = () => {
           showsVerticalScrollIndicator={false}
         >
           <View className="auth-content">
-            {/* Branding */}
             <View className="auth-brand-block">
               <View className="auth-logo-wrap">
                 <View className="auth-logo-mark">
@@ -256,7 +226,6 @@ const SignIn = () => {
               </Text>
             </View>
 
-            {/* Sign-In Form */}
             <View className="p-5 mt-16 border rounded-3xl border-border">
               <View className="auth-form">
                 <View className="auth-field">
@@ -290,9 +259,8 @@ const SignIn = () => {
 
                 <View className="auth-field">
                   <Text className="auth-label">Password</Text>
-
                   <View
-                    className={`flex-row items-center border rounded-xl border-border ${
+                    className={`flex-row items-center border rounded-xl ${
                       passwordTouched && !passwordValid
                         ? "border-destructive"
                         : "border-border"
@@ -313,7 +281,6 @@ const SignIn = () => {
                         paddingVertical: vs(10),
                       }}
                     />
-
                     <Pressable
                       onPress={() => setShowPassword((prev) => !prev)}
                       className="px-3"
@@ -326,11 +293,9 @@ const SignIn = () => {
                       )}
                     </Pressable>
                   </View>
-
                   {passwordTouched && !passwordValid && (
                     <Text className="auth-error">Password is required</Text>
                   )}
-
                   {errors.fields.password && (
                     <Text className="auth-error">
                       {errors.fields.password.message}
@@ -347,7 +312,6 @@ const SignIn = () => {
               </View>
             </View>
 
-            {/* Sign-Up Link */}
             <View className="auth-link-row">
               <Text className="auth-link-copy">Don't have an account?</Text>
               <Link href="/(auth)/sign-up" asChild>

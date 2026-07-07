@@ -61,7 +61,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   secondaryButton: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.primary,
     paddingVertical: vs(12),
     borderRadius: ms(10),
     alignItems: "center",
@@ -135,6 +135,23 @@ export const globalStyles = StyleSheet.create({
     fontSize: ms(10),
     fontWeight: "bold",
     // fontFamily: FONTS.regular,
+  },
+  bodyPadding: {
+    paddingHorizontal: ms(15),
+  },
+  pageTitle: {
+    fontFamily: "sans-bold",
+    fontSize: ms(15),
+  },
+  fab: {
+    position: "absolute",
+    margin: ms(20),
+    right: 0,
+    bottom: ms(100),
+    borderRadius: ms(999),
+    backgroundColor: colors.accent,
+    padding: ms(2),
+    color: "#ffffff",
   },
 });
 

@@ -25,7 +25,7 @@ const UpcomingSubscriptionCard = ({
     <TouchableOpacity
       style={styles.cardContainer}
       onPress={onPress}
-      className="shadow"
+      // className="shadow"
     >
       <View className="flex flex-row justify-between">
         <View className="flex flex-row " style={{ gap: ms(13) }}>
@@ -51,7 +51,7 @@ const UpcomingSubscriptionCard = ({
             <Text
               numberOfLines={1}
               // ellipsizeMode=""
-              style={{ color: colors.gray, fontSize: ms(9) }}
+              style={{ color: colors.gray, fontSize: ms(11) }}
             >
               {category?.trim() ||
                 plan?.trim() ||
@@ -62,7 +62,7 @@ const UpcomingSubscriptionCard = ({
               numberOfLines={1}
               style={{
                 fontFamily: "sans-medium",
-                fontSize: ms(10),
+                fontSize: ms(11),
                 paddingHorizontal: ms(10),
                 paddingVertical: ms(4),
                 borderRadius: ms(20),
@@ -93,7 +93,7 @@ const UpcomingSubscriptionCard = ({
             numberOfLines={1}
             style={{
               fontFamily: "sans-regular",
-              fontSize: ms(9),
+              fontSize: ms(11),
               color: colors.gray,
             }}
           >
@@ -136,8 +136,10 @@ const styles = StyleSheet.create({
     // shadowOffset: { width: 0, height: 4 },
     // shadowOpacity: 0.1,
     // shadowRadius: 12,
+    marginHorizontal: ms(2),
     elevation: 4,
-    marginHorizontal: ms(15),
+    borderWidth: ms(1),
+    borderColor: "#E2E8F1",
   },
   image: {
     height: vs(50),
@@ -145,10 +147,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "sans-bold",
-    fontSize: ms(13),
+    fontSize: ms(14),
   },
   currency: {
     fontFamily: "sans-bold",
-    fontSize: ms(12),
+    fontSize: ms(15),
   },
 });

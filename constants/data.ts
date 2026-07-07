@@ -1,10 +1,38 @@
 import { icons } from "./icons";
 
+// export const tabs: AppTab[] = [
+//   { name: "index", title: "Home", icon: icons.home },
+//   { name: "subscriptions", title: "Subscriptions", icon: icons.wallet },
+//   { name: "insights", title: "Insights", icon: icons.activity },
+//   { name: "settings", title: "Settings", icon: icons.setting },
+// ];
+
 export const tabs: AppTab[] = [
-  { name: "index", title: "Home", icon: icons.home },
-  { name: "subscriptions", title: "Subscriptions", icon: icons.wallet },
-  { name: "insights", title: "Insights", icon: icons.activity },
-  { name: "settings", title: "Settings", icon: icons.setting },
+  {
+    name: "index",
+    title: "Home",
+    icon: icons.home,
+    tourDescription:
+      "See all your subscriptions and upcoming bills at a glance.",
+  },
+  {
+    name: "subscriptions",
+    title: "Subscriptions",
+    icon: icons.wallet,
+    tourDescription: "Track a new subscription or bill in under 10 seconds.",
+  },
+  {
+    name: "insights",
+    title: "Insights",
+    icon: icons.activity,
+    tourDescription: "See exactly where your money goes every month.",
+  },
+  {
+    name: "settings",
+    title: "Settings",
+    icon: icons.setting,
+    tourDescription: "Update your currency, reminders, and preferences.",
+  },
 ];
 
 export const HOME_USER = {
