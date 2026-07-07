@@ -1,4 +1,4 @@
-import { Subscription } from "@/types/subscription";
+import { Subscription } from "@/type";
 
 // Days-before-renewal window in which a subscription counts as "due soon".
 // NOTE: billing_cycle is currently a loose `string` on Subscription — worth

@@ -3,7 +3,7 @@ import { SubscriptionStatus } from "@/type";
 import { StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 
-const STATUS_CONFIG: Record
+const STATUS_CONFIG: Record<
   SubscriptionStatus,
   { label: string; bg: string; text: string }
 > = {

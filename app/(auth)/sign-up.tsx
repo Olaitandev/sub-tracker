@@ -107,10 +107,15 @@ const SignUp = () => {
     }
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     setLoadingOtp(true);
-    signUp.verifications.sendEmailCode();
-    setLoadingOtp(false);
+    try {
+      await signUp.verifications.sendEmailCode();
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setLoadingOtp(false);
+    }
   };
 
   // Don't show anything if already signed in or sign-up is complete

@@ -80,7 +80,7 @@ const SignIn = () => {
     if (signIn.status === "complete") {
       await signIn.finalize({
         navigate: async ({ session }) => {
-          if (session?.currentTask) return;
+          if (!session || session.currentTask) return;
           await onSignInComplete(
             session!.user.id,
             session!.getToken.bind(session),

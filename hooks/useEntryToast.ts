@@ -36,7 +36,7 @@ export function useEntryToast() {
       case "complete_onboarding":
         showInfo(
           "Please complete your profile",
-          "Lets get to know abit about you.",
+          "Let's get to know a bit about you.",
           300,
         );
         break;

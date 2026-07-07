@@ -50,50 +50,29 @@ declare global {
   interface ListHeadingProps {
     title: string;
   }
-  export type SubscriptionStatus = "active" | "paused" | "cancelled";
+  type SubscriptionStatus = "active" | "paused" | "cancelled";
 
-//   export interface Subscription {
-//     id: string;
-//     icon: ImageSourcePropType;
-//     name: string;
-//     plan?: string;
-//     category?: string;
-//     paymentMethod?: string;
-//     startDate?: string;
-//     price: number;
-//     currency?: string;
-//     billing: string;
-//     frequency?: string;
-//     renewalDate?: string;
-//     color?: string;
-//     status: SubscriptionStatus;
-//     notes?: string;
-//     icon_id?: string | null;
-//     icon_color?: string | null;
-//     icon_initials?: string | null;
-//   }
-// }
-
- interface Subscription {
-  id: string;
-  icon: ImageSourcePropType;
-  service_name: string;
-  plan?: string;
-  category?: string;
-  payment_method?: string;
-  start_date?: string;
-  amount: number;
-  currency_code?: string;
-  billing_cycle: string;
-  next_renewal_date?: string;
-  color?: string;
-  status: SubscriptionStatus;
-  notes?: string;
-  icon_id?: string | null;
-  icon_color?: string | null;
-  icon_initials?: string | null;
-  notifications?: string[];
-  notifications_enabled?: boolean;
+  interface Subscription {
+    id: string;
+    icon?: ImageSourcePropType;
+    service_name: string;
+    plan?: string;
+    category?: string;
+    payment_method?: string;
+    start_date?: string;
+    amount: number;
+    currency_code?: string;
+    billing_cycle: string;
+    next_renewal_date?: string;
+    color?: string;
+    status: SubscriptionStatus;
+    notes?: string;
+    icon_id?: string | null;
+    icon_color?: string | null;
+    icon_initials?: string | null;
+    notifications?: string[];
+    notifications_enabled?: boolean;
+  }
 }
 
 export { Subscription, SubscriptionStatus };

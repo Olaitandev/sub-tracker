@@ -67,6 +67,7 @@ const UpcomingSubscriptionModal = ({
 
   // Reset to detail view whenever modal opens
   function handleClose() {
+    if (isSubmitting) return;
     setView("detail");
     setPaidAt(new Date());
     setShowDatePicker(false);
@@ -88,7 +89,6 @@ const UpcomingSubscriptionModal = ({
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      console.log("button pressed on modal");
       await markAsPaid(paidAt.toISOString());
       handleClose();
     } catch {

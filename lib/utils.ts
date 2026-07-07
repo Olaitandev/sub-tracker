@@ -64,5 +64,6 @@ export const getInitials = (name?: string) => {
   return words
     .map((word) => word[0])
     .join("")
+    .slice(0, 2)
     .toUpperCase();
 };

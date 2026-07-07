@@ -92,6 +92,9 @@ const UserInfo = () => {
 
     try {
       const token = await getToken();
+      if (!token) {
+        throw new Error("Your session has expired. Please try again.");
+      }
 
       const res = await fetch(
         `${SUPABASE_URL}/functions/v1/complete-onboarding`,

@@ -102,9 +102,11 @@ export default function SubscriptionCard({ subscription, onPress }: Props) {
     icon_initials,
   } = subscription;
 
-  const renewalColor = getRenewalUrgencyColor(next_renewal_date);
+  const renewalColor = next_renewal_date
+    ? getRenewalUrgencyColor(next_renewal_date)
+    : colors.gray;
   const accentColor = icon_color ?? colors.accent;
-  const initials = getInitials(service_name);
+  const initials = icon_initials ?? getInitials(service_name);
 
   return (
     <TouchableOpacity

@@ -21,7 +21,7 @@ export function useMarkAsPaid({
   onSuccess,
 }: UseMarkAsPaidOptions): UseMarkAsPaidReturn {
   const { getToken } = useAuth();
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
   const posthog = usePostHog();
 
   // Stable ref — avoids stale closure on getToken without adding it
@@ -41,26 +41,37 @@ export function useMarkAsPaid({
       throw new Error("No token");
     }
 
-    const res = await fetch(
-      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/mark-as-paid`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+    let res: Response;
+    let data: { message?: string; subscription?: Subscription };
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      res = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/mark-as-paid`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            subscription_id: subscription.id,
+            paid_at: paidAt,
+          }),
+          signal: controller.signal,
         },
-        body: JSON.stringify({
-          subscription_id: subscription.id,
-          paid_at: paidAt,
-        }),
-      },
-    );
-
-    const data = await res.json();
+      );
+      clearTimeout(timeoutId);
+      data = await res.json();
+      showSuccess("Subscription marked as paid.");
+    } catch {
+      showError("Network error. Please check your connection and try again.");
+      throw new Error("Network error");
+    }
 
     if (!res.ok) {
       showError(data.message ?? "Failed to mark as paid. Please try again.");
-      throw new Error(data.message);
+      throw new Error(data.message ?? "Failed to mark as paid");
     }
 
     onSuccess(data.subscription);

@@ -46,6 +46,7 @@ export type Subscription = {
   notifications: string[];
   is_active: boolean;
   created_at: string;
+  status: "active" | "paused" | "cancelled";
 };
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
@@ -81,7 +82,7 @@ function EmptyState({
 function ErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyTitle}>Couldn't load subscriptions</Text>
+      <Text style={styles.emptyTitle}>Couldn&apos;t load subscriptions</Text>
       <Text style={styles.emptySubtitle}>
         Check your connection and try again
       </Text>
